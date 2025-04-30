@@ -10,8 +10,10 @@ if not API_TOKEN:
 if not OPENROUTER_API_KEY:
     raise ValueError("OPENROUTER_API_KEY не найден! Задайте переменную окружения OPENROUTER_API_KEY.")
 
-openai.api_key = OPENROUTER_API_KEY
-openai.api_base = "https://openrouter.ai/api/v1"
+client = openai.OpenAI(
+    api_key=OPENROUTER_API_KEY,
+    base_url="https://openrouter.ai/api/v1"
+)
 
 PROMPT = """
 # Character
@@ -39,12 +41,9 @@ PROMPT = """
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
-def is_cyrillic(text):
-    return any('А' <= c <= 'я' or c == 'ё' or c == 'Ё' for c in text)
-
 def translate_ai(text):
     prompt = PROMPT.format(text)
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="openai/gpt-4o-mini-2024-07-18",
         messages=[
             {"role": "system", "content": prompt}

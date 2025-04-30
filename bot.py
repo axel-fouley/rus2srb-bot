@@ -15,50 +15,25 @@ client = openai.OpenAI(
     base_url="https://openrouter.ai/api/v1"
 )
 
-PROMPT = """
-Ты переводчик между русским и сербским языками.
+PROMPT = (
+    "Ты профессиональный переводчик с сербского на русский и с русского на сербский. "
+    "Определи язык входного текста (русский или сербский) и переведи его на другой язык. "
+    "Для сербского используй только латиницу, для русского — только кириллицу. "
+    "Не добавляй никаких пояснений, кавычек или исходного текста, только перевод.\n"
+)
 
-- Если текст на кириллице — это русский, переводи на сербский (латиница).
-- Если текст на латинице — это сербский, переводи на русский (кириллица).
-- Не повторяй исходный текст.
-- Не используй тире, кавычки и другие символы вокруг перевода.
-- Если перевод невозможен, напиши: нет перевода.
-- Ответь только переводом, без исходного текста, тире, кавычек и пояснений.
-
-Примеры:
-kako si?
-как ты?
-kako je život?
-как жизнь?
-как жизнь?
-kako je život?
-как дела?
-kako si?
-dobro veče
-добрый вечер
-Москва
-Moskva
-Tesla
-Тесла
-asdfgh
-нет перевода
-radio
-радио
-радио
-radio
-
-Переведи: "{}"
-"""
-
-bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+WELCOME_MESSAGE = (
+    "Что может делать этот бот?\n\n"
+    "Простой и удобный переводчик с русского на сербский и наоборот.\n"
+    "Jednostavan i udoban prevodilac sa ruskog na srpski i obrnuto.\n\n"
+    "by @AX_sites"
+)
 
 def clean_translation(text):
-    # Убирает кавычки и пробелы в начале и конце строки
     return text.strip().strip('"').strip("'").strip()
 
 def translate_ai(text):
-    prompt = PROMPT.format(text)
+    prompt = PROMPT + text
     response = client.chat.completions.create(
         model="openai/gpt-4o-mini-2024-07-18",
         messages=[
@@ -68,6 +43,13 @@ def translate_ai(text):
         temperature=0.2,
     )
     return response.choices[0].message.content.strip()
+
+bot = Bot(token=API_TOKEN)
+dp = Dispatcher(bot)
+
+@dp.message_handler(commands=['start'])
+async def send_welcome(message: types.Message):
+    await message.reply(WELCOME_MESSAGE)
 
 @dp.message_handler()
 async def handle_message(message: types.Message):

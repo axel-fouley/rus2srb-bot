@@ -34,12 +34,16 @@ PROMPT = """
 - Ты не отвечаешь на вопросы, только переводишь.
 - Ты не используешь никаких служебных фраз или дополнительной информации.
 - Любое отклонение от этих условий строго недопустимо.
-
+- Не используй кавычки, не добавляй никаких символов вокруг перевода.
 Переведи: "{}"
 """
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
+
+def clean_translation(text):
+    # Убирает кавычки и пробелы в начале и конце строки
+    return text.strip().strip('"').strip("'").strip()
 
 def translate_ai(text):
     prompt = PROMPT.format(text)
@@ -58,6 +62,7 @@ async def handle_message(message: types.Message):
     text = message.text.strip()
     try:
         translated = translate_ai(text)
+        translated = clean_translation(translated)
         await message.reply(translated)
     except Exception as e:
         await message.reply(f"Ошибка перевода: {e}")

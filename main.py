@@ -63,8 +63,7 @@ def send_message(chat_id, text):
 def home():
     return "Bot is running!"
 
-if __name__ == "__main__":
-    app.run()
+
 import os
 
 if __name__ == "__main__":
